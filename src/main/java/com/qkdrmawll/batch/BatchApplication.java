@@ -14,11 +14,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class BatchApplication implements CommandLineRunner {
 
 	private final JobLauncher launcher;
-	private final Job simpleJob;
+	private final Job elasticSyncJob;
 
-    public BatchApplication(JobLauncher launcher, Job simpleJob) {
+    public BatchApplication(JobLauncher launcher, Job elasticSyncJob) {
         this.launcher = launcher;
-        this.simpleJob = simpleJob;
+        this.elasticSyncJob = elasticSyncJob;
     }
 
     public static void main(String[] args) {
@@ -30,10 +30,10 @@ public class BatchApplication implements CommandLineRunner {
 		System.out.println("배치 실행 시작 !");
 
 		JobParameters params = new JobParametersBuilder()
-				.addLong("time", System.currentTimeMillis())
+				.addLong("timestamp", System.currentTimeMillis())
 				.toJobParameters();
 
-		launcher.run(simpleJob, params);
+		launcher.run(elasticSyncJob, params);
 		System.out.println("배치 실행 완료 !");
 	}
 }

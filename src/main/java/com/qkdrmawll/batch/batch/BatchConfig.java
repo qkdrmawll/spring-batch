@@ -1,5 +1,6 @@
 package com.qkdrmawll.batch.batch;
 
+import com.qkdrmawll.batch.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -15,25 +16,26 @@ import org.springframework.transaction.PlatformTransactionManager;
 @RequiredArgsConstructor
 public class BatchConfig {
 
-
     private final JobRepository jobRepository; // 배치 실행 정보를 저장하는 역할
     private final PlatformTransactionManager transactionManager; // 트랜잭션 관리 ( 실패 시 롤백 가능)
-
+    private final UserItemReader userItemReader;
+    private final UserItemProcessor userItemProcessor;
+    private final UserItemWriter userItemWriter;
 
     @Bean
-    public Job simpleJob() {
-        return new JobBuilder("simplejob", jobRepository) // 'simplejob' 이라는 배치 작업 실행
-                .start(simpleStep()) // simpleStep() 실행
+    public Job userChunkJob() {
+        return new JobBuilder("userChunkJob", jobRepository) // 'userChunkJob' 이라는 배치 작업 실행
+                .start(userChunkStep()) // simpleStep() 실행
                 .build();
     }
 
     @Bean
-    public Step simpleStep() {
-        return new StepBuilder("simpleStep", jobRepository)
-                .tasklet((contribution, chunkContext) -> { // tasklet 작은 작업을 수행하는 코드
-                    System.out.println("Hello, Spring Batch");
-                    return RepeatStatus.FINISHED;
-                },transactionManager)
+    public Step userChunkStep() {
+        return new StepBuilder("userChunkStep", jobRepository)
+                .<User, User>chunk(2, transactionManager)
+                .reader(userItemReader)
+                .processor(userItemProcessor)
+                .writer(userItemWriter)
                 .build();
     }
 }
